@@ -2,7 +2,7 @@
   "name": "Estudio Flash - PWA",
   "short_name": "EstudioFlash",
   "description": "Una aplicación de flashcards para mejorar tu aprendizaje.",
-  "start_url": "/",
+  "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#f3f4f6",
   "theme_color": "#8B5CF6",
