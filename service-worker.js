@@ -1,64 +1,66 @@
-const CACHE_NAME = 'estudio-flash-cache-v2';
+const CACHE_NAME = 'estudio-flash-cache-v3';
 const urlsToCache = [
-  'index.html',
-  'manifest.json',
-  'icon-192.png',
-  'icon-512.png'
+  './index.html',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png',
+  // Puedes añadir más recursos que quieras cachear
 ];
 
 // Instalación del Service Worker
 self.addEventListener('install', event => {
+  console.log('[SW] Instalando Service Worker...');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      console.log('Cache abierto');
+      console.log('[SW] Caché abierto y agregando archivos');
       return cache.addAll(urlsToCache);
     })
   );
-  self.skipWaiting(); // fuerza que el SW nuevo tome control
+  self.skipWaiting();
 });
 
 // Activación y limpieza de cachés viejos
 self.addEventListener('activate', event => {
+  console.log('[SW] Activando Service Worker...');
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then(cacheNames =>
       Promise.all(
         cacheNames.map(cacheName => {
           if (!cacheWhitelist.includes(cacheName)) {
-            console.log('Cache eliminado:', cacheName);
+            console.log('[SW] Eliminando caché viejo:', cacheName);
             return caches.delete(cacheName);
           }
         })
       )
     )
   );
-  self.clients.claim(); // toma control inmediato de las páginas abiertas
+  self.clients.claim();
 });
 
 // Interceptar peticiones
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request).then(response => {
-      // Devuelve la respuesta desde caché si existe
-      if (response) return response;
-
-      // Si no, la pide a la red y la cachea para la próxima
-      return fetch(event.request).then(networkResponse => {
-        // Solo cacheamos respuestas exitosas y tipo básico
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+      if (response) {
+        // Devuelve la respuesta desde caché
+        return response;
+      }
+      // Si no está en caché, buscar en la red
+      return fetch(event.request)
+        .then(networkResponse => {
+          // Solo cachear respuestas válidas
+          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+            return networkResponse;
+          }
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
           return networkResponse;
-        }
-
-        const responseClone = networkResponse.clone();
-        caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, responseClone);
+        })
+        .catch(() => {
+          // Fallback: si falla la red, cargar index.html desde la caché
+          return caches.match('./index.html');
         });
-
-        return networkResponse;
-      });
-    }).catch(() => {
-      // Opcional: puedes devolver un fallback si no hay conexión
-      return caches.match('index.html');
     })
   );
 });
