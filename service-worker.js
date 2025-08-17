@@ -1,10 +1,10 @@
 const CACHE_NAME = 'estudio-flash-cache-v4';
 const BASE_PATH = '/Estudio/'; // <- Cambia esto por el nombre de tu repo
 const urlsToCache = [
-  `${BASE_PATH}index.html`,
-  `${BASE_PATH}manifest.json`,
-  `${BASE_PATH}icon-192.png`,
-  `${BASE_PATH}icon-512.png`,
+  `${Estudio}index.html`,
+  `${Estudio}manifest.json`,
+  `${Estudio}icon-192.png`,
+  `${Estudio}icon-512.png`,
 ];
 
 // Instalación del Service Worker
