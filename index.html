@@ -1,175 +1,374 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estudio Flash - PWA</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#8B5CF6">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
-        body { font-family: 'Poppins', sans-serif; background-color: #f3f4f6; }
-        .card-flip-container { perspective: 1000px; }
-        .card { transition: transform 0.6s; transform-style: preserve-3d; position: relative; }
-        .card.is-flipped { transform: rotateY(180deg); }
-        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; justify-content: center; align-items: center; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.05); }
-        .card-front { background-color: #fff; color: #374151; }
-        .card-back { background-color: #8B5CF6; color: #fff; transform: rotateY(180deg); }
-        .nav-item.active { color: #8B5CF6; border-bottom: 2px solid #8B5CF6; }
-        .modal { display: none; }
-        .modal.flex { display: flex; }
-    </style>
-</head>
-<body class="text-gray-800">
-<div id="app" class="max-w-4xl mx-auto p-4 pb-24">
-    <div id="main-content"></div>
-    <nav class="fixed bottom-0 left-0 right-0 bg-white shadow-lg max-w-4xl mx-auto border-t">
-        <div class="flex justify-around">
-            <button onclick="navigate('home')" class="nav-item flex-1 text-center py-4 text-gray-500 active">
-                <i class="fas fa-home text-xl"></i>
-                <span class="block text-xs">Inicio</span>
-            </button>
-            <button onclick="navigate('study')" class="nav-item flex-1 text-center py-4 text-gray-500">
-                <i class="fas fa-book-open text-xl"></i>
-                <span class="block text-xs">Estudiar</span>
-            </button>
-            <button onclick="navigate('goals')" class="nav-item flex-1 text-center py-4 text-gray-500">
-                <i class="fas fa-bullseye text-xl"></i>
-                <span class="block text-xs">Metas</span>
-            </button>
-        </div>
-    </nav>
-</div>
+<!DOCTYPE html>  <html lang="es">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>Estudio Flash - PWA</title>  
+    <script src="https://cdn.tailwindcss.com"></script>  
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">  
+    <link rel="manifest" href="manifest.json">  
+    <meta name="theme-color" content="#8B5CF6">  
+    <style>  
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');  
+        body {  
+            font-family: 'Poppins', sans-serif;  
+            background-color: #f3f4f6;  
+        }  
+        .card-flip-container {  
+            perspective: 1000px;  
+        }  
+        .card {  
+            transition: transform 0.6s;  
+            transform-style: preserve-3d;  
+            position: relative;  
+        }  
+        .card.is-flipped {  
+            transform: rotateY(180deg);  
+        }  
+        .card-face {  
+            position: absolute;  
+            width: 100%;  
+            height: 100%;  
+            backface-visibility: hidden;  
+            display: flex;  
+            justify-content: center;  
+            align-items: center;  
+            padding: 1.5rem;  
+            border-radius: 1rem;  
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);  
+        }  
+        .card-front {  
+            background-color: #fff;  
+            color: #374151;  
+        }  
+        .card-back {  
+            background-color: #8B5CF6;  
+            color: #fff;  
+            transform: rotateY(180deg);  
+        }  
+        .nav-item.active {  
+            color: #8B5CF6;  
+            border-bottom: 2px solid #8B5CF6;  
+        }  
+        /* Estilos para modales */  
+        .modal {  
+            display: none; /* Oculto por defecto */  
+        }  
+        .modal.flex {  
+            display: flex;  
+        }  
+    </style>  
+</head>  
+<body class="text-gray-800">  <div id="app" class="max-w-4xl mx-auto p-4 pb-24">  
+    <!-- Contenido principal de la aplicación -->  
+    <div id="main-content"></div>  
 
-<input type="file" id="import-backup-input" class="hidden" accept=".json" onchange="handleBackupFileSelect(event)">
+    <!-- Barra de navegación inferior -->  
+    <nav class="fixed bottom-0 left-0 right-0 bg-white shadow-lg max-w-4xl mx-auto border-t">  
+        <div class="flex justify-around">  
+            <button onclick="navigate('home')" class="nav-item flex-1 text-center py-4 text-gray-500 active">  
+                <i class="fas fa-home text-xl"></i>  
+                <span class="block text-xs">Inicio</span>  
+            </button>  
+            <button onclick="navigate('study')" class="nav-item flex-1 text-center py-4 text-gray-500">  
+                <i class="fas fa-book-open text-xl"></i>  
+                <span class="block text-xs">Estudiar</span>  
+            </button>  
+            <button onclick="navigate('goals')" class="nav-item flex-1 text-center py-4 text-gray-500">  
+                <i class="fas fa-bullseye text-xl"></i>  
+                <span class="block text-xs">Metas</span>  
+            </button>  
+        </div>  
+    </nav>  
+</div>  
 
-<div id="import-modal" class="modal fixed inset-0 bg-black bg-opacity-60 items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
-        <h2 class="text-2xl font-bold mb-4">Importar Tarjetas</h2>
-        <p class="text-gray-600 mb-2">Pega tu lista. Usa este formato:</p>
-        <pre class="bg-gray-100 p-3 rounded text-sm mb-4 overflow-auto">Pregunta 1<br>---<br>Respuesta 1<br><br>Pregunta 2<br>---<br>Respuesta 2</pre>
-        <textarea id="bulk-import-text" class="w-full h-48 p-2 border rounded-lg focus:ring-2 focus:ring-violet-500" placeholder="Pega tus tarjetas aquí..."></textarea>
-        <div class="flex justify-end gap-4 mt-4">
-            <button onclick="closeImportModal()" class="bg-gray-200 text-gray-800 py-2 px-6 rounded-lg font-semibold hover:bg-gray-300 transition-colors">Cancelar</button>
-            <button onclick="importCards()" class="bg-violet-600 text-white py-2 px-6 rounded-lg font-semibold hover:bg-violet-700 transition-colors">Importar</button>
-        </div>
-    </div>
-</div>
+<!-- Input oculto para importar respaldo -->  
+<input type="file" id="import-backup-input" class="hidden" accept=".json" onchange="handleBackupFileSelect(event)">  
 
-<div id="confirm-modal" class="modal fixed inset-0 bg-black bg-opacity-60 items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md text-center">
-        <i class="fas fa-exclamation-triangle text-4xl text-amber-500 mb-4"></i>
-        <h2 class="text-2xl font-bold mb-2">¿Estás seguro?</h2>
-        <p id="confirm-modal-text" class="text-gray-600 mb-6"></p>
-        <div class="flex justify-center gap-4">
-            <button id="confirm-modal-cancel" class="bg-gray-200 text-gray-800 py-2 px-6 rounded-lg font-semibold hover:bg-gray-300 transition-colors">Cancelar</button>
-            <button id="confirm-modal-confirm" class="bg-red-600 text-white py-2 px-6 rounded-lg font-semibold hover:bg-red-700 transition-colors">Sí, continuar</button>
-        </div>
-    </div>
-</div>
+<!-- Modal para importar tarjetas desde texto -->  
+<div id="import-modal" class="modal fixed inset-0 bg-black bg-opacity-60 items-center justify-center p-4 z-50">  
+    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">  
+        <h2 class="text-2xl font-bold mb-4">Importar Tarjetas</h2>  
+        <p class="text-gray-600 mb-2">Pega tu lista. Usa este formato:</p>  
+        <pre class="bg-gray-100 p-3 rounded text-sm mb-4 overflow-auto">Pregunta 1<br>---<br>Respuesta 1<br><br>Pregunta 2<br>---<br>Respuesta 2</pre>  
+        <textarea id="bulk-import-text" class="w-full h-48 p-2 border rounded-lg focus:ring-2 focus:ring-violet-500" placeholder="Pega tus tarjetas aquí..."></textarea>  
+        <div class="flex justify-end gap-4 mt-4">  
+            <button onclick="closeImportModal()" class="bg-gray-200 text-gray-800 py-2 px-6 rounded-lg font-semibold hover:bg-gray-300 transition-colors">Cancelar</button>  
+            <button onclick="importCards()" class="bg-violet-600 text-white py-2 px-6 rounded-lg font-semibold hover:bg-violet-700 transition-colors">Importar</button>  
+        </div>  
+    </div>  
+</div>  
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
-<script>
-// ---------------------- TU JS COMPLETO ----------------------
-let state = {
-    subjects: [],
-    currentView: 'home',
-    selectedSubjectId: null,
-    selectedTopicId: null,
-    studySession: {
-        cards: [],
-        currentIndex: 0,
-        correct: 0,
-        incorrect: 0
-    }
-};
+<!-- Modal de confirmación para importar respaldo -->  
+<div id="confirm-modal" class="modal fixed inset-0 bg-black bg-opacity-60 items-center justify-center p-4 z-50">  
+    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md text-center">  
+        <i class="fas fa-exclamation-triangle text-4xl text-amber-500 mb-4"></i>  
+        <h2 class="text-2xl font-bold mb-2">¿Estás seguro?</h2>  
+        <p id="confirm-modal-text" class="text-gray-600 mb-6"></p>  
+        <div class="flex justify-center gap-4">  
+            <button id="confirm-modal-cancel" class="bg-gray-200 text-gray-800 py-2 px-6 rounded-lg font-semibold hover:bg-gray-300 transition-colors">Cancelar</button>  
+            <button id="confirm-modal-confirm" class="bg-red-600 text-white py-2 px-6 rounded-lg font-semibold hover:bg-red-700 transition-colors">Sí, continuar</button>  
+        </div>  
+    </div>  
+</div>  
 
-const synth = new Tone.Synth({ oscillator: { type: 'sine' } }).toDestination();
 
-const correctSound = () => synth.triggerAttackRelease("G5", "16n", Tone.now());
-const incorrectSound = () => synth.triggerAttackRelease("E3", "16n", Tone.now());
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>  
+<script>  
+    // --- MODELO DE DATOS Y LÓGICA ---  
+    let state = {  
+        subjects: [],  
+        currentView: 'home',  
+        selectedSubjectId: null,  
+        selectedTopicId: null,  
+        studySession: {  
+            cards: [],  
+            currentIndex: 0,  
+            correct: 0,  
+            incorrect: 0  
+        }  
+    };  
 
-// Guardar y cargar datos
-function saveData() { localStorage.setItem('flashcardApp', JSON.stringify(state)); }
-function loadData() {
-    const data = localStorage.getItem('flashcardApp');
-    if (data) {
-        const loadedState = JSON.parse(data);
-        loadedState.subjects.forEach(subject => {
-            subject.topics.forEach(topic => {
-                topic.cards.forEach(card => {
-                    if (card.repetition === undefined) {
-                        card.repetition = 0;
-                        card.interval = 1;
-                        card.easeFactor = 2.5;
-                        card.dueDate = new Date().toISOString();
-                    }
-                });
-            });
-        });
-        state = loadedState;
-    } else {
-        state.subjects = [
-            { id: 1, name: 'Matemáticas', topics: [{ id: 1, name: 'Teoría de Conjuntos', cards: [{ id: 1, question: '¿Qué es un conjunto?', answer: 'Una colección de elementos distintos.', repetition: 0, interval: 1, easeFactor: 2.5, dueDate: new Date().toISOString() }, { id: 2, question: '¿Qué es la unión de dos conjuntos A y B?', answer: 'Un conjunto con todos los elementos de A y B.', repetition: 0, interval: 1, easeFactor: 2.5, dueDate: new Date().toISOString() }] }] },
-            { id: 2, name: 'Historia', topics: [] }
-        ];
-    }
-}
+    const synth = new Tone.Synth({ oscillator: { type: 'sine' } }).toDestination();  
+    const correctSound = () => synth.triggerAttackRelease("G5", "16n", Tone.now());  
+    const incorrectSound = () => synth.triggerAttackRelease("E3", "16n", Tone.now());  
 
-// Navegación y renderizado
-function navigate(view, params = {}) {
-    state.currentView = view;
-    if (params.subjectId !== undefined) state.selectedSubjectId = params.subjectId;
-    if (params.topicId !== undefined) state.selectedTopicId = params.topicId;
-    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-    const activeItem = document.querySelector(`.nav-item[onclick="navigate('${view.split('_')[0]}')"]`);
-    if (activeItem) activeItem.classList.add('active');
-    render();
-}
+    function saveData() {  
+        localStorage.setItem('flashcardApp', JSON.stringify(state));  
+    }  
 
-function render() {
-    const mainContent = document.getElementById('main-content');
-    switch (state.currentView) {
-        case 'home':
-            mainContent.innerHTML = renderHome();
-            break;
-        case 'subject_details':
-            mainContent.innerHTML = renderSubjectDetails();
-            break;
-        case 'topic_details':
-            mainContent.innerHTML = renderTopicDetails();
-            break;
-        case 'study':
-            mainContent.innerHTML = renderStudySelection();
-            break;
-        case 'study_session':
-            mainContent.innerHTML = renderStudySession();
-            break;
-        case 'goals':
-            mainContent.innerHTML = renderGoals();
-            break;
-    }
-}
+    function loadData() {  
+        const data = localStorage.getItem('flashcardApp');  
+        if (data) {  
+            const loadedState = JSON.parse(data);  
+            loadedState.subjects.forEach(subject => {  
+                subject.topics.forEach(topic => {  
+                    topic.cards.forEach(card => {  
+                        if (card.repetition === undefined) {  
+                            card.repetition = 0;  
+                            card.interval = 1;  
+                            card.easeFactor = 2.5;  
+                            card.dueDate = new Date().toISOString();  
+                        }  
+                    });  
+                });  
+            });  
+            state = loadedState;  
+        } else {  
+            state.subjects = [  
+                { id: 1, name: 'Matemáticas', topics: [  
+                    { id: 1, name: 'Teoría de Conjuntos', cards: [  
+                        { id: 1, question: '¿Qué es un conjunto?', answer: 'Una colección de elementos distintos.', repetition: 0, interval: 1, easeFactor: 2.5, dueDate: new Date().toISOString() },  
+                        { id: 2, question: '¿Qué es la unión de dos conjuntos A y B?', answer: 'Un conjunto con todos los elementos de A y B.', repetition: 0, interval: 1, easeFactor: 2.5, dueDate: new Date().toISOString() }  
+                    ]}  
+                ]},  
+                { id: 2, name: 'Historia', topics: [] }  
+            ];  
+        }  
+    }  
 
-// ---------------------- AQUÍ SIGUE TODO TU JS ----------------------
-// Copia tal cual todo tu código de funciones renderHome, renderSubjectDetails, 
-// renderTopicDetails, renderStudySelection, renderStudySession, renderGoals, 
-// y todas las funciones de manejo de tarjetas, import/export, modales, sonidos, etc.
-// ---------------------- FIN JS ----------------------
-loadData();
-render();
-</script>
+    // --- NAVEGACIÓN ---  
+    function navigate(view, params = {}) {  
+        state.currentView = view;  
+        if (params.subjectId !== undefined) state.selectedSubjectId = params.subjectId;  
+        if (params.topicId !== undefined) state.selectedTopicId = params.topicId;  
 
-<script>
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-            .then(registration => console.log('ServiceWorker registration successful with scope: ', registration.scope))
-            .catch(err => console.log('ServiceWorker registration failed: ', err));
-    });
-}
-</script>
-</body>
-</html>
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));  
+        const activeItem = document.querySelector(`.nav-item[onclick="navigate('${view.split('_')[0]}')"]`);  
+        if(activeItem) activeItem.classList.add('active');  
+
+        render();  
+    }  
+
+    // --- RENDERIZADO DE VISTAS ---  
+    function render() {  
+        const mainContent = document.getElementById('main-content');  
+        switch (state.currentView) {  
+            case 'home':  
+                mainContent.innerHTML = renderHome();  
+                break;  
+            case 'subject_details':  
+                mainContent.innerHTML = renderSubjectDetails();  
+                break;  
+            case 'topic_details':  
+                mainContent.innerHTML = renderTopicDetails();  
+                break;  
+            case 'study':  
+                mainContent.innerHTML = renderStudySelection();  
+                break;  
+            case 'study_session':  
+                mainContent.innerHTML = renderStudySession();  
+                break;  
+            case 'goals':  
+                mainContent.innerHTML = renderGoals();  
+                break;  
+        }  
+    }  
+
+    // --- VISTAS (TEMPLATES HTML) ---  
+    function renderHome() {  
+        return `  
+            <h1 class="text-3xl font-bold text-violet-600 mb-6">Mis Materias</h1>  
+            <div id="subjects-list" class="space-y-4">  
+                ${state.subjects.map(subject => `  
+                    <div class="bg-white p-4 rounded-lg shadow cursor-pointer transition-transform hover:scale-105" onclick="navigate('subject_details', { subjectId: ${subject.id} })">  
+                        <h2 class="text-xl font-semibold">${subject.name}</h2>  
+                        <p class="text-sm text-gray-500">${subject.topics.length} temas</p>  
+                    </div>  
+                `).join('')}  
+            </div>  
+            <div class="mt-6">  
+                <input id="new-subject-name" type="text" placeholder="Nueva materia..." class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-violet-500">  
+                <button onclick="addSubject()" class="w-full mt-2 bg-violet-600 text-white p-3 rounded-lg font-semibold hover:bg-violet-700 transition-colors">  
+                    <i class="fas fa-plus mr-2"></i>Añadir Materia  
+                </button>  
+            </div>  
+
+            <div class="mt-10 bg-white p-4 rounded-lg shadow">  
+                <h2 class="text-xl font-semibold mb-4">Ajustes</h2>  
+                <div class="flex flex-col sm:flex-row gap-2">  
+                    <button onclick="exportBackup()" class="flex-1 bg-blue-500 text-white p-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors">  
+                        <i class="fas fa-download mr-2"></i>Exportar Respaldo  
+                    </button>  
+                    <button onclick="triggerBackupImport()" class="flex-1 bg-green-500 text-white p-3 rounded-lg font-semibold hover:bg-green-600 transition-colors">  
+                        <i class="fas fa-upload mr-2"></i>Importar Respaldo  
+                    </button>  
+                </div>  
+            </div>  
+        `;  
+    }  
+
+    function renderSubjectDetails() {  
+        const subject = state.subjects.find(s => s.id === state.selectedSubjectId);  
+        return `  
+            <button onclick="navigate('home')" class="mb-4 text-violet-600 font-semibold"><i class="fas fa-arrow-left mr-2"></i>Volver a Materias</button>  
+            <h1 class="text-3xl font-bold text-violet-600 mb-6">${subject.name}</h1>  
+            <div class="space-y-4">  
+                ${subject.topics.map(topic => `  
+                    <div class="bg-white p-4 rounded-lg shadow cursor-pointer transition-transform hover:scale-105" onclick="navigate('topic_details', { subjectId: ${subject.id}, topicId: ${topic.id} })">  
+                        <h2 class="text-xl font-semibold">${topic.name}</h2>  
+                        <p class="text-sm text-gray-500">${topic.cards.length} tarjetas</p>  
+                    </div>  
+                `).join('')}  
+            </div>  
+             <div class="mt-6">  
+                <input id="new-topic-name" type="text" placeholder="Nuevo tema..." class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-violet-500">  
+                <button onclick="addTopic()" class="w-full mt-2 bg-green-500 text-white p-3 rounded-lg font-semibold hover:bg-green-600 transition-colors">  
+                    <i class="fas fa-plus mr-2"></i>Añadir Tema  
+                </button>  
+            </div>  
+        `;  
+    }  
+
+    function renderTopicDetails() {  
+        const subject = state.subjects.find(s => s.id === state.selectedSubjectId);  
+        const topic = subject.topics.find(t => t.id === state.selectedTopicId);  
+        return `  
+            <button onclick="navigate('subject_details', { subjectId: ${subject.id} })" class="mb-4 text-violet-600 font-semibold"><i class="fas fa-arrow-left mr-2"></i>Volver a ${subject.name}</button>  
+            <h1 class="text-3xl font-bold text-violet-600 mb-2">${topic.name}</h1>  
+            <p class="text-gray-500 mb-6">Tienes ${topic.cards.length} tarjetas en este tema.</p>  
+              
+            <div class="bg-white p-4 rounded-lg shadow mb-6">  
+                <h2 class="text-xl font-semibold mb-4">Añadir Tarjetas</h2>  
+                <textarea id="new-card-question" placeholder="Pregunta..." class="w-full p-2 border rounded-lg mb-2"></textarea>  
+                <textarea id="new-card-answer" placeholder="Respuesta..." class="w-full p-2 border rounded-lg mb-4"></textarea>  
+                <button onclick="addCard()" class="w-full bg-blue-500 text-white p-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors">  
+                    <i class="fas fa-plus mr-2"></i>Añadir Tarjeta  
+                </button>  
+                <button onclick="openImportModal()" class="w-full mt-2 bg-teal-500 text-white p-3 rounded-lg font-semibold hover:bg-teal-600 transition-colors">  
+                    <i class="fas fa-file-import mr-2"></i>Importar desde Texto  
+                </button>  
+            </div>  
+
+            <h2 class="text-2xl font-bold mb-4">Tarjetas</h2>  
+            <div class="space-y-3">  
+                ${topic.cards.map(card => `  
+                    <div class="bg-white p-3 rounded-lg shadow">  
+                        <p class="font-semibold">${card.question}</p>  
+                        <p class="text-sm text-gray-600">${card.answer}</p>  
+                    </div>  
+                `).join('')}  
+            </div>  
+        `;  
+    }  
+
+    function renderStudySelection() {  
+        const today = new Date();  
+        today.setHours(23, 59, 59, 999);   
+        return `  
+            <h1 class="text-3xl font-bold text-violet-600 mb-6">Elige qué estudiar</h1>  
+            <div class="space-y-6">  
+                ${state.subjects.map(subject => {  
+                    const topicsHtml = subject.topics.length > 0 ? subject.topics.map(topic => {  
+                        const dueCardsCount = topic.cards.filter(card => new Date(card.dueDate) <= today).length;  
+                        return `  
+                        <div class="bg-white p-4 rounded-lg shadow mb-3">  
+                            <h3 class="text-lg font-semibold mb-3">${topic.name}</h3>  
+                            <div class="flex flex-col sm:flex-row gap-2">  
+                                <button onclick="startStudySession(${subject.id}, ${topic.id}, 'review')" class="flex-1 bg-amber-500 text-white p-3 rounded-lg font-semibold hover:bg-amber-600 transition-colors disabled:bg-gray-300" ${dueCardsCount === 0 ? 'disabled' : ''}>  
+                                    Repasar (${dueCardsCount})  
+                                </button>  
+                                <button onclick="startStudySession(${subject.id}, ${topic.id}, 'all')" class="flex-1 bg-violet-500 text-white p-3 rounded-lg font-semibold hover:bg-violet-600 transition-colors disabled:bg-gray-300" ${topic.cards.length === 0 ? 'disabled' : ''}>  
+                                    Estudiar Todo (${topic.cards.length})  
+                                </button>  
+                            </div>  
+                        </div>  
+                        `;  
+                    }).join('') : '<p class="text-gray-500 italic">No hay temas en esta materia.</p>';  
+                      
+                    return `  
+                    <div>  
+                        <h2 class="text-2xl font-bold mb-3">${subject.name}</h2>  
+                        ${topicsHtml}  
+                    </div>  
+                    `;  
+                }).join('')}  
+            </div>  
+        `;  
+    }  
+
+    function renderStudySession() {  
+        const session = state.studySession;  
+        if (session.currentIndex >= session.cards.length) {  
+            return renderStudySummary();  
+        }  
+        const card = session.cards[session.currentIndex];  
+        return `  
+            <div class="text-center">  
+                <p class="text-gray-500 mb-4">Tarjeta ${session.currentIndex + 1} de ${session.cards.length}</p>  
+                <div class="card-flip-container w-full h-64 mb-6">  
+                    <div id="flashcard" class="card w-full h-full">  
+                        <div class="card-face card-front text-2xl font-bold">${card.question}</div>  
+                        <div class="card-face card-back text-xl">${card.answer}</div>  
+                    </div>  
+                </div>  
+                <button onclick="flipCard()" class="bg-blue-500 text-white py-2 px-6 rounded-lg font-semibold mb-8 hover:bg-blue-600">Girar Tarjeta</button>  
+                <div class="flex justify-around">  
+                    <button onclick="markAnswer(false)" class="bg-red-500 text-white py-3 px-8 rounded-lg font-bold text-lg hover:bg-red-600"><i class="fas fa-times"></i> Mal</button>  
+                    <button onclick="markAnswer(true)" class="bg-green-500 text-white py-3 px-8 rounded-lg font-bold text-lg hover:bg-green-600"><i class="fas fa-check"></i> Bien</button>  
+                </div>  
+            </div>  
+        `;  
+    }  
+
+    function renderStudySummary() {  
+        const session = state.studySession;  
+        const total = session.correct + session.incorrect;  
+        const percentage = total > 0 ? Math.round((session.correct / total) * 100) : 0;  
+        return `  
+            <div class="text-center bg-white p-6 rounded-lg shadow-lg">  
+                <h1 class="text-3xl font-bold text-violet-600 mb-4">¡Sesión Completada!</h1>  
+                <div class="text-lg space-y-2">  
+                    <p><strong>Tarjetas Correctas:</strong> <span class="text-green-500 font-bold">${session.correct}</span></p>  
+                    <p><strong>Tarjetas Incorrectas:</strong> <span class="text-red-500 font-bold">${session.incorrect}</span></p>  
+                    <p class="text-2xl font-bold mt-4">Puntuación: ${percentage}%</p>  
+                </div>  
+                <button onclick="navigate('study')" class="mt-8 bg-violet-600 text-white py-3 px-8 rounded-lg font-semibold hover:bg-violet-700">Estudiar otro tema</button>  
+            </div>  
+        `;  
+    }  
+
+    function renderGoals() {  
+        return `  
+            <h1 class="text-3xl font-bold text-violet-600 mb-6">Mis Metas</h1>  
+            <div class="bg-white p-6 rounded-lg shadow-lg text-center"
+
