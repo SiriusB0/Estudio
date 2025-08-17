@@ -1,45 +1,43 @@
-const CACHE_NAME = 'estudio-flash-cache-v1';
+const CACHE_NAME = 'estudio-flash-cache-v2';
 const urlsToCache = [
-  '/',
-  '/index.html', // Asumiendo que el HTML principal se llama así
-  'https://cdn.tailwindcss.com',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-  'https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js',
-  'https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap'
+  './index.html',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
+// Instalación del Service Worker
 self.addEventListener('install', event => {
-  // Realiza la instalación del service worker
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
+    caches.open(CACHE_NAME).then(cache => {
+      console.log('Cache abierto');
+      return cache.addAll(urlsToCache);
+    })
   );
 });
 
+// Interceptar peticiones
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Cache hit - return response
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
+    caches.match(event.request).then(response => {
+      // Devuelve la respuesta desde caché si existe
+      if (response) {
+        return response;
       }
-    )
+      // Si no, la pide a la red normalmente
+      return fetch(event.request);
+    })
   );
 });
 
+// Activación y limpieza de cachés viejos
 self.addEventListener('activate', event => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
+          if (!cacheWhitelist.includes(cacheName)) {
             return caches.delete(cacheName);
           }
         })
