@@ -1,64 +1,50 @@
-const CACHE_NAME = 'estudio-flash-cache-v4';
-const BASE_PATH = '/Estudio/'; // <- Cambia esto por el nombre de tu repo
+const CACHE_NAME = 'estudio-flash-cache-v1';
 const urlsToCache = [
-  `${Estudio}index.html`,
-  `${Estudio}manifest.json`,
-  `${Estudio}icon-192.png`,
-  `${Estudio}icon-512.png`,
+'/',
+'/index.html', // Asumiendo que el HTML principal se llama así
+'https://cdn.tailwindcss.com',
+'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
+'https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js',
+'https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap'
 ];
 
-// Instalación del Service Worker
 self.addEventListener('install', event => {
-  console.log('[SW] Instalando Service Worker...');
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      console.log('[SW] Caché abierto y agregando archivos');
-      return cache.addAll(urlsToCache);
-    })
-  );
-  self.skipWaiting();
+// Realiza la instalación del service worker
+event.waitUntil(
+caches.open(CACHE_NAME)
+.then(cache => {
+console.log('Opened cache');
+return cache.addAll(urlsToCache);
+})
+);
 });
 
-// Activación y limpieza de cachés viejos
-self.addEventListener('activate', event => {
-  console.log('[SW] Activando Service Worker...');
-  const cacheWhitelist = [CACHE_NAME];
-  event.waitUntil(
-    caches.keys().then(cacheNames =>
-      Promise.all(
-        cacheNames.map(cacheName => {
-          if (!cacheWhitelist.includes(cacheName)) {
-            console.log('[SW] Eliminando caché viejo:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      )
-    )
-  );
-  self.clients.claim();
-});
-
-// Interceptar peticiones
 self.addEventListener('fetch', event => {
-  const requestURL = new URL(event.request.url);
-
-  // Solo interceptar recursos del mismo dominio
-  if (!requestURL.href.startsWith(location.origin + BASE_PATH)) return;
-
-  event.respondWith(
-    caches.match(event.request).then(response => {
-      if (response) return response;
-
-      return fetch(event.request)
-        .then(networkResponse => {
-          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-            return networkResponse;
-          }
-          const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
-          return networkResponse;
-        })
-        .catch(() => caches.match(`${BASE_PATH}index.html`))
-    })
-  );
+event.respondWith(
+caches.match(event.request)
+.then(response => {
+// Cache hit - return response
+if (response) {
+return response;
+}
+return fetch(event.request);
+}
+)
+);
 });
+
+self.addEventListener('activate', event => {
+const cacheWhitelist = [CACHE_NAME];
+event.waitUntil(
+caches.keys().then(cacheNames => {
+return Promise.all(
+cacheNames.map(cacheName => {
+if (cacheWhitelist.indexOf(cacheName) === -1) {
+return caches.delete(cacheName);
+}
+})
+);
+})
+);
+});
+
