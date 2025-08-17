@@ -1,10 +1,10 @@
-const CACHE_NAME = 'estudio-flash-cache-v3';
+const CACHE_NAME = 'estudio-flash-cache-v4';
+const BASE_PATH = '/NOMBRE-DEL-REPO/'; // <- Cambia esto por el nombre de tu repo
 const urlsToCache = [
-  './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png',
-  // Puedes añadir más recursos que quieras cachear
+  `${BASE_PATH}index.html`,
+  `${BASE_PATH}manifest.json`,
+  `${BASE_PATH}icon-192.png`,
+  `${BASE_PATH}icon-512.png`,
 ];
 
 // Instalación del Service Worker
@@ -40,16 +40,17 @@ self.addEventListener('activate', event => {
 
 // Interceptar peticiones
 self.addEventListener('fetch', event => {
+  const requestURL = new URL(event.request.url);
+
+  // Solo interceptar recursos del mismo dominio
+  if (!requestURL.href.startsWith(location.origin + BASE_PATH)) return;
+
   event.respondWith(
     caches.match(event.request).then(response => {
-      if (response) {
-        // Devuelve la respuesta desde caché
-        return response;
-      }
-      // Si no está en caché, buscar en la red
+      if (response) return response;
+
       return fetch(event.request)
         .then(networkResponse => {
-          // Solo cachear respuestas válidas
           if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
             return networkResponse;
           }
@@ -57,10 +58,7 @@ self.addEventListener('fetch', event => {
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
           return networkResponse;
         })
-        .catch(() => {
-          // Fallback: si falla la red, cargar index.html desde la caché
-          return caches.match('./index.html');
-        });
+        .catch(() => caches.match(`${BASE_PATH}index.html`))
     })
   );
 });
