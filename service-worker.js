@@ -1,5 +1,5 @@
 const CACHE_NAME = 'estudio-flash-cache-v4';
-const BASE_PATH = '/NOMBRE-DEL-REPO/'; // <- Cambia esto por el nombre de tu repo
+const BASE_PATH = '/Estudio/'; // <- Cambia esto por el nombre de tu repo
 const urlsToCache = [
   `${BASE_PATH}index.html`,
   `${BASE_PATH}manifest.json`,
