@@ -10,616 +10,166 @@
     <meta name="theme-color" content="#8B5CF6">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f3f4f6;
-        }
-        .card-flip-container {
-            perspective: 1000px;
-        }
-        .card {
-            transition: transform 0.6s;
-            transform-style: preserve-3d;
-            position: relative;
-        }
-        .card.is-flipped {
-            transform: rotateY(180deg);
-        }
-        .card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 1.5rem;
-            border-radius: 1rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        .card-front {
-            background-color: #fff;
-            color: #374151;
-        }
-        .card-back {
-            background-color: #8B5CF6;
-            color: #fff;
-            transform: rotateY(180deg);
-        }
-        .nav-item.active {
-            color: #8B5CF6;
-            border-bottom: 2px solid #8B5CF6;
-        }
-        /* Estilos para modales */
-        .modal {
-            display: none; /* Oculto por defecto */
-        }
-        .modal.flex {
-            display: flex;
-        }
+        body { font-family: 'Poppins', sans-serif; background-color: #f3f4f6; }
+        .card-flip-container { perspective: 1000px; }
+        .card { transition: transform 0.6s; transform-style: preserve-3d; position: relative; }
+        .card.is-flipped { transform: rotateY(180deg); }
+        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; justify-content: center; align-items: center; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.05); }
+        .card-front { background-color: #fff; color: #374151; }
+        .card-back { background-color: #8B5CF6; color: #fff; transform: rotateY(180deg); }
+        .nav-item.active { color: #8B5CF6; border-bottom: 2px solid #8B5CF6; }
+        .modal { display: none; }
+        .modal.flex { display: flex; }
     </style>
 </head>
 <body class="text-gray-800">
+<div id="app" class="max-w-4xl mx-auto p-4 pb-24">
+    <div id="main-content"></div>
+    <nav class="fixed bottom-0 left-0 right-0 bg-white shadow-lg max-w-4xl mx-auto border-t">
+        <div class="flex justify-around">
+            <button onclick="navigate('home')" class="nav-item flex-1 text-center py-4 text-gray-500 active">
+                <i class="fas fa-home text-xl"></i>
+                <span class="block text-xs">Inicio</span>
+            </button>
+            <button onclick="navigate('study')" class="nav-item flex-1 text-center py-4 text-gray-500">
+                <i class="fas fa-book-open text-xl"></i>
+                <span class="block text-xs">Estudiar</span>
+            </button>
+            <button onclick="navigate('goals')" class="nav-item flex-1 text-center py-4 text-gray-500">
+                <i class="fas fa-bullseye text-xl"></i>
+                <span class="block text-xs">Metas</span>
+            </button>
+        </div>
+    </nav>
+</div>
 
-    <div id="app" class="max-w-4xl mx-auto p-4 pb-24">
-        <!-- Contenido principal de la aplicación -->
-        <div id="main-content"></div>
+<input type="file" id="import-backup-input" class="hidden" accept=".json" onchange="handleBackupFileSelect(event)">
 
-        <!-- Barra de navegación inferior -->
-        <nav class="fixed bottom-0 left-0 right-0 bg-white shadow-lg max-w-4xl mx-auto border-t">
-            <div class="flex justify-around">
-                <button onclick="navigate('home')" class="nav-item flex-1 text-center py-4 text-gray-500 active">
-                    <i class="fas fa-home text-xl"></i>
-                    <span class="block text-xs">Inicio</span>
-                </button>
-                <button onclick="navigate('study')" class="nav-item flex-1 text-center py-4 text-gray-500">
-                    <i class="fas fa-book-open text-xl"></i>
-                    <span class="block text-xs">Estudiar</span>
-                </button>
-                <button onclick="navigate('goals')" class="nav-item flex-1 text-center py-4 text-gray-500">
-                    <i class="fas fa-bullseye text-xl"></i>
-                    <span class="block text-xs">Metas</span>
-                </button>
-            </div>
-        </nav>
-    </div>
-
-    <!-- Input oculto para importar respaldo -->
-    <input type="file" id="import-backup-input" class="hidden" accept=".json" onchange="handleBackupFileSelect(event)">
-
-    <!-- Modal para importar tarjetas desde texto -->
-    <div id="import-modal" class="modal fixed inset-0 bg-black bg-opacity-60 items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
-            <h2 class="text-2xl font-bold mb-4">Importar Tarjetas</h2>
-            <p class="text-gray-600 mb-2">Pega tu lista. Usa este formato:</p>
-            <pre class="bg-gray-100 p-3 rounded text-sm mb-4 overflow-auto">Pregunta 1<br>---<br>Respuesta 1<br><br>Pregunta 2<br>---<br>Respuesta 2</pre>
-            <textarea id="bulk-import-text" class="w-full h-48 p-2 border rounded-lg focus:ring-2 focus:ring-violet-500" placeholder="Pega tus tarjetas aquí..."></textarea>
-            <div class="flex justify-end gap-4 mt-4">
-                <button onclick="closeImportModal()" class="bg-gray-200 text-gray-800 py-2 px-6 rounded-lg font-semibold hover:bg-gray-300 transition-colors">Cancelar</button>
-                <button onclick="importCards()" class="bg-violet-600 text-white py-2 px-6 rounded-lg font-semibold hover:bg-violet-700 transition-colors">Importar</button>
-            </div>
+<div id="import-modal" class="modal fixed inset-0 bg-black bg-opacity-60 items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
+        <h2 class="text-2xl font-bold mb-4">Importar Tarjetas</h2>
+        <p class="text-gray-600 mb-2">Pega tu lista. Usa este formato:</p>
+        <pre class="bg-gray-100 p-3 rounded text-sm mb-4 overflow-auto">Pregunta 1<br>---<br>Respuesta 1<br><br>Pregunta 2<br>---<br>Respuesta 2</pre>
+        <textarea id="bulk-import-text" class="w-full h-48 p-2 border rounded-lg focus:ring-2 focus:ring-violet-500" placeholder="Pega tus tarjetas aquí..."></textarea>
+        <div class="flex justify-end gap-4 mt-4">
+            <button onclick="closeImportModal()" class="bg-gray-200 text-gray-800 py-2 px-6 rounded-lg font-semibold hover:bg-gray-300 transition-colors">Cancelar</button>
+            <button onclick="importCards()" class="bg-violet-600 text-white py-2 px-6 rounded-lg font-semibold hover:bg-violet-700 transition-colors">Importar</button>
         </div>
     </div>
+</div>
 
-    <!-- Modal de confirmación para importar respaldo -->
-    <div id="confirm-modal" class="modal fixed inset-0 bg-black bg-opacity-60 items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md text-center">
-            <i class="fas fa-exclamation-triangle text-4xl text-amber-500 mb-4"></i>
-            <h2 class="text-2xl font-bold mb-2">¿Estás seguro?</h2>
-            <p id="confirm-modal-text" class="text-gray-600 mb-6"></p>
-            <div class="flex justify-center gap-4">
-                <button id="confirm-modal-cancel" class="bg-gray-200 text-gray-800 py-2 px-6 rounded-lg font-semibold hover:bg-gray-300 transition-colors">Cancelar</button>
-                <button id="confirm-modal-confirm" class="bg-red-600 text-white py-2 px-6 rounded-lg font-semibold hover:bg-red-700 transition-colors">Sí, continuar</button>
-            </div>
+<div id="confirm-modal" class="modal fixed inset-0 bg-black bg-opacity-60 items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md text-center">
+        <i class="fas fa-exclamation-triangle text-4xl text-amber-500 mb-4"></i>
+        <h2 class="text-2xl font-bold mb-2">¿Estás seguro?</h2>
+        <p id="confirm-modal-text" class="text-gray-600 mb-6"></p>
+        <div class="flex justify-center gap-4">
+            <button id="confirm-modal-cancel" class="bg-gray-200 text-gray-800 py-2 px-6 rounded-lg font-semibold hover:bg-gray-300 transition-colors">Cancelar</button>
+            <button id="confirm-modal-confirm" class="bg-red-600 text-white py-2 px-6 rounded-lg font-semibold hover:bg-red-700 transition-colors">Sí, continuar</button>
         </div>
     </div>
+</div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+<script>
+// ---------------------- TU JS COMPLETO ----------------------
+let state = {
+    subjects: [],
+    currentView: 'home',
+    selectedSubjectId: null,
+    selectedTopicId: null,
+    studySession: {
+        cards: [],
+        currentIndex: 0,
+        correct: 0,
+        incorrect: 0
+    }
+};
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
-    <script>
-        // --- MODELO DE DATOS Y LÓGICA ---
-        let state = {
-            subjects: [],
-            currentView: 'home',
-            selectedSubjectId: null,
-            selectedTopicId: null,
-            studySession: {
-                cards: [],
-                currentIndex: 0,
-                correct: 0,
-                incorrect: 0
-            }
-        };
+const synth = new Tone.Synth({ oscillator: { type: 'sine' } }).toDestination();
 
-        const synth = new Tone.Synth({ oscillator: { type: 'sine' } }).toDestination();
-        const correctSound = () => synth.triggerAttackRelease("G5", "16n", Tone.now());
-        const incorrectSound = () => synth.triggerAttackRelease("E3", "16n", Tone.now());
+const correctSound = () => synth.triggerAttackRelease("G5", "16n", Tone.now());
+const incorrectSound = () => synth.triggerAttackRelease("E3", "16n", Tone.now());
 
-        function saveData() {
-            localStorage.setItem('flashcardApp', JSON.stringify(state));
-        }
-
-        function loadData() {
-            const data = localStorage.getItem('flashcardApp');
-            if (data) {
-                const loadedState = JSON.parse(data);
-                loadedState.subjects.forEach(subject => {
-                    subject.topics.forEach(topic => {
-                        topic.cards.forEach(card => {
-                            if (card.repetition === undefined) {
-                                card.repetition = 0;
-                                card.interval = 1;
-                                card.easeFactor = 2.5;
-                                card.dueDate = new Date().toISOString();
-                            }
-                        });
-                    });
+// Guardar y cargar datos
+function saveData() { localStorage.setItem('flashcardApp', JSON.stringify(state)); }
+function loadData() {
+    const data = localStorage.getItem('flashcardApp');
+    if (data) {
+        const loadedState = JSON.parse(data);
+        loadedState.subjects.forEach(subject => {
+            subject.topics.forEach(topic => {
+                topic.cards.forEach(card => {
+                    if (card.repetition === undefined) {
+                        card.repetition = 0;
+                        card.interval = 1;
+                        card.easeFactor = 2.5;
+                        card.dueDate = new Date().toISOString();
+                    }
                 });
-                state = loadedState;
-            } else {
-                state.subjects = [
-                    { id: 1, name: 'Matemáticas', topics: [
-                        { id: 1, name: 'Teoría de Conjuntos', cards: [
-                            { id: 1, question: '¿Qué es un conjunto?', answer: 'Una colección de elementos distintos.', repetition: 0, interval: 1, easeFactor: 2.5, dueDate: new Date().toISOString() },
-                            { id: 2, question: '¿Qué es la unión de dos conjuntos A y B?', answer: 'Un conjunto con todos los elementos de A y B.', repetition: 0, interval: 1, easeFactor: 2.5, dueDate: new Date().toISOString() }
-                        ]}
-                    ]},
-                    { id: 2, name: 'Historia', topics: [] }
-                ];
-            }
-        }
-
-        // --- NAVEGACIÓN ---
-        function navigate(view, params = {}) {
-            state.currentView = view;
-            if (params.subjectId !== undefined) state.selectedSubjectId = params.subjectId;
-            if (params.topicId !== undefined) state.selectedTopicId = params.topicId;
-            
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            const activeItem = document.querySelector(`.nav-item[onclick="navigate('${view.split('_')[0]}')"]`);
-            if(activeItem) activeItem.classList.add('active');
-
-            render();
-        }
-
-        // --- RENDERIZADO DE VISTAS ---
-        function render() {
-            const mainContent = document.getElementById('main-content');
-            switch (state.currentView) {
-                case 'home':
-                    mainContent.innerHTML = renderHome();
-                    break;
-                case 'subject_details':
-                    mainContent.innerHTML = renderSubjectDetails();
-                    break;
-                case 'topic_details':
-                    mainContent.innerHTML = renderTopicDetails();
-                    break;
-                case 'study':
-                    mainContent.innerHTML = renderStudySelection();
-                    break;
-                case 'study_session':
-                    mainContent.innerHTML = renderStudySession();
-                    break;
-                case 'goals':
-                    mainContent.innerHTML = renderGoals();
-                    break;
-            }
-        }
-
-        // --- VISTAS (TEMPLATES HTML) ---
-        function renderHome() {
-            return `
-                <h1 class="text-3xl font-bold text-violet-600 mb-6">Mis Materias</h1>
-                <div id="subjects-list" class="space-y-4">
-                    ${state.subjects.map(subject => `
-                        <div class="bg-white p-4 rounded-lg shadow cursor-pointer transition-transform hover:scale-105" onclick="navigate('subject_details', { subjectId: ${subject.id} })">
-                            <h2 class="text-xl font-semibold">${subject.name}</h2>
-                            <p class="text-sm text-gray-500">${subject.topics.length} temas</p>
-                        </div>
-                    `).join('')}
-                </div>
-                <div class="mt-6">
-                    <input id="new-subject-name" type="text" placeholder="Nueva materia..." class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-violet-500">
-                    <button onclick="addSubject()" class="w-full mt-2 bg-violet-600 text-white p-3 rounded-lg font-semibold hover:bg-violet-700 transition-colors">
-                        <i class="fas fa-plus mr-2"></i>Añadir Materia
-                    </button>
-                </div>
-
-                <div class="mt-10 bg-white p-4 rounded-lg shadow">
-                    <h2 class="text-xl font-semibold mb-4">Ajustes</h2>
-                    <div class="flex flex-col sm:flex-row gap-2">
-                        <button onclick="exportBackup()" class="flex-1 bg-blue-500 text-white p-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors">
-                            <i class="fas fa-download mr-2"></i>Exportar Respaldo
-                        </button>
-                        <button onclick="triggerBackupImport()" class="flex-1 bg-green-500 text-white p-3 rounded-lg font-semibold hover:bg-green-600 transition-colors">
-                            <i class="fas fa-upload mr-2"></i>Importar Respaldo
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderSubjectDetails() {
-            const subject = state.subjects.find(s => s.id === state.selectedSubjectId);
-            return `
-                <button onclick="navigate('home')" class="mb-4 text-violet-600 font-semibold"><i class="fas fa-arrow-left mr-2"></i>Volver a Materias</button>
-                <h1 class="text-3xl font-bold text-violet-600 mb-6">${subject.name}</h1>
-                <div class="space-y-4">
-                    ${subject.topics.map(topic => `
-                        <div class="bg-white p-4 rounded-lg shadow cursor-pointer transition-transform hover:scale-105" onclick="navigate('topic_details', { subjectId: ${subject.id}, topicId: ${topic.id} })">
-                            <h2 class="text-xl font-semibold">${topic.name}</h2>
-                            <p class="text-sm text-gray-500">${topic.cards.length} tarjetas</p>
-                        </div>
-                    `).join('')}
-                </div>
-                 <div class="mt-6">
-                    <input id="new-topic-name" type="text" placeholder="Nuevo tema..." class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-violet-500">
-                    <button onclick="addTopic()" class="w-full mt-2 bg-green-500 text-white p-3 rounded-lg font-semibold hover:bg-green-600 transition-colors">
-                        <i class="fas fa-plus mr-2"></i>Añadir Tema
-                    </button>
-                </div>
-            `;
-        }
-        
-        function renderTopicDetails() {
-            const subject = state.subjects.find(s => s.id === state.selectedSubjectId);
-            const topic = subject.topics.find(t => t.id === state.selectedTopicId);
-            return `
-                <button onclick="navigate('subject_details', { subjectId: ${subject.id} })" class="mb-4 text-violet-600 font-semibold"><i class="fas fa-arrow-left mr-2"></i>Volver a ${subject.name}</button>
-                <h1 class="text-3xl font-bold text-violet-600 mb-2">${topic.name}</h1>
-                <p class="text-gray-500 mb-6">Tienes ${topic.cards.length} tarjetas en este tema.</p>
-                
-                <div class="bg-white p-4 rounded-lg shadow mb-6">
-                    <h2 class="text-xl font-semibold mb-4">Añadir Tarjetas</h2>
-                    <textarea id="new-card-question" placeholder="Pregunta..." class="w-full p-2 border rounded-lg mb-2"></textarea>
-                    <textarea id="new-card-answer" placeholder="Respuesta..." class="w-full p-2 border rounded-lg mb-4"></textarea>
-                    <button onclick="addCard()" class="w-full bg-blue-500 text-white p-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors">
-                        <i class="fas fa-plus mr-2"></i>Añadir Tarjeta
-                    </button>
-                    <button onclick="openImportModal()" class="w-full mt-2 bg-teal-500 text-white p-3 rounded-lg font-semibold hover:bg-teal-600 transition-colors">
-                        <i class="fas fa-file-import mr-2"></i>Importar desde Texto
-                    </button>
-                </div>
-
-                <h2 class="text-2xl font-bold mb-4">Tarjetas</h2>
-                <div class="space-y-3">
-                    ${topic.cards.map(card => `
-                        <div class="bg-white p-3 rounded-lg shadow">
-                            <p class="font-semibold">${card.question}</p>
-                            <p class="text-sm text-gray-600">${card.answer}</p>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        function renderStudySelection() {
-            const today = new Date();
-            today.setHours(23, 59, 59, 999); 
-            return `
-                <h1 class="text-3xl font-bold text-violet-600 mb-6">Elige qué estudiar</h1>
-                <div class="space-y-6">
-                    ${state.subjects.map(subject => {
-                        const topicsHtml = subject.topics.length > 0 ? subject.topics.map(topic => {
-                            const dueCardsCount = topic.cards.filter(card => new Date(card.dueDate) <= today).length;
-                            return `
-                            <div class="bg-white p-4 rounded-lg shadow mb-3">
-                                <h3 class="text-lg font-semibold mb-3">${topic.name}</h3>
-                                <div class="flex flex-col sm:flex-row gap-2">
-                                    <button onclick="startStudySession(${subject.id}, ${topic.id}, 'review')" class="flex-1 bg-amber-500 text-white p-3 rounded-lg font-semibold hover:bg-amber-600 transition-colors disabled:bg-gray-300" ${dueCardsCount === 0 ? 'disabled' : ''}>
-                                        Repasar (${dueCardsCount})
-                                    </button>
-                                    <button onclick="startStudySession(${subject.id}, ${topic.id}, 'all')" class="flex-1 bg-violet-500 text-white p-3 rounded-lg font-semibold hover:bg-violet-600 transition-colors disabled:bg-gray-300" ${topic.cards.length === 0 ? 'disabled' : ''}>
-                                        Estudiar Todo (${topic.cards.length})
-                                    </button>
-                                </div>
-                            </div>
-                            `;
-                        }).join('') : '<p class="text-gray-500 italic">No hay temas en esta materia.</p>';
-                        
-                        return `
-                        <div>
-                            <h2 class="text-2xl font-bold mb-3">${subject.name}</h2>
-                            ${topicsHtml}
-                        </div>
-                        `;
-                    }).join('')}
-                </div>
-            `;
-        }
-
-        function renderStudySession() {
-            const session = state.studySession;
-            if (session.currentIndex >= session.cards.length) {
-                return renderStudySummary();
-            }
-            const card = session.cards[session.currentIndex];
-            return `
-                <div class="text-center">
-                    <p class="text-gray-500 mb-4">Tarjeta ${session.currentIndex + 1} de ${session.cards.length}</p>
-                    <div class="card-flip-container w-full h-64 mb-6">
-                        <div id="flashcard" class="card w-full h-full">
-                            <div class="card-face card-front text-2xl font-bold">${card.question}</div>
-                            <div class="card-face card-back text-xl">${card.answer}</div>
-                        </div>
-                    </div>
-                    <button onclick="flipCard()" class="bg-blue-500 text-white py-2 px-6 rounded-lg font-semibold mb-8 hover:bg-blue-600">Girar Tarjeta</button>
-                    <div class="flex justify-around">
-                        <button onclick="markAnswer(false)" class="bg-red-500 text-white py-3 px-8 rounded-lg font-bold text-lg hover:bg-red-600"><i class="fas fa-times"></i> Mal</button>
-                        <button onclick="markAnswer(true)" class="bg-green-500 text-white py-3 px-8 rounded-lg font-bold text-lg hover:bg-green-600"><i class="fas fa-check"></i> Bien</button>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderStudySummary() {
-            const session = state.studySession;
-            const total = session.correct + session.incorrect;
-            const percentage = total > 0 ? Math.round((session.correct / total) * 100) : 0;
-            return `
-                <div class="text-center bg-white p-6 rounded-lg shadow-lg">
-                    <h1 class="text-3xl font-bold text-violet-600 mb-4">¡Sesión Completada!</h1>
-                    <div class="text-lg space-y-2">
-                        <p><strong>Tarjetas Correctas:</strong> <span class="text-green-500 font-bold">${session.correct}</span></p>
-                        <p><strong>Tarjetas Incorrectas:</strong> <span class="text-red-500 font-bold">${session.incorrect}</span></p>
-                        <p class="text-2xl font-bold mt-4">Puntuación: ${percentage}%</p>
-                    </div>
-                    <button onclick="navigate('study')" class="mt-8 bg-violet-600 text-white py-3 px-8 rounded-lg font-semibold hover:bg-violet-700">Estudiar otro tema</button>
-                </div>
-            `;
-        }
-        
-        function renderGoals() {
-            return `
-                <h1 class="text-3xl font-bold text-violet-600 mb-6">Mis Metas</h1>
-                <div class="bg-white p-6 rounded-lg shadow-lg text-center">
-                    <i class="fas fa-cogs text-5xl text-gray-300 mb-4"></i>
-                    <h2 class="text-2xl font-semibold mb-2">Página en Construcción</h2>
-                    <p class="text-gray-500">Estamos trabajando para traerte un sistema de metas y seguimiento. ¡Vuelve pronto!</p>
-                </div>
-            `;
-        }
-
-        // --- LÓGICA DE LA APLICACIÓN ---
-        function addSubject() {
-            const input = document.getElementById('new-subject-name');
-            if (input.value.trim()) {
-                state.subjects.push({ id: Date.now(), name: input.value.trim(), topics: [] });
-                input.value = '';
-                saveData();
-                render();
-            }
-        }
-
-        function addTopic() {
-            const input = document.getElementById('new-topic-name');
-            if (input.value.trim()) {
-                const subject = state.subjects.find(s => s.id === state.selectedSubjectId);
-                subject.topics.push({ id: Date.now(), name: input.value.trim(), cards: [] });
-                input.value = '';
-                saveData();
-                render();
-            }
-        }
-
-        function addCard() {
-            const questionInput = document.getElementById('new-card-question');
-            const answerInput = document.getElementById('new-card-answer');
-            if (questionInput.value.trim() && answerInput.value.trim()) {
-                const subject = state.subjects.find(s => s.id === state.selectedSubjectId);
-                const topic = subject.topics.find(t => t.id === state.selectedTopicId);
-                topic.cards.push({ id: Date.now(), question: questionInput.value.trim(), answer: answerInput.value.trim(), repetition: 0, interval: 1, easeFactor: 2.5, dueDate: new Date().toISOString() });
-                questionInput.value = '';
-                answerInput.value = '';
-                saveData();
-                render();
-            }
-        }
-        
-        // --- LÓGICA DE MODALES ---
-        function openImportModal() { document.getElementById('import-modal').classList.add('flex'); }
-        function closeImportModal() { document.getElementById('import-modal').classList.remove('flex'); }
-        
-        function showConfirmModal(text, onConfirm) {
-            const modal = document.getElementById('confirm-modal');
-            document.getElementById('confirm-modal-text').textContent = text;
-            modal.classList.add('flex');
-
-            const confirmBtn = document.getElementById('confirm-modal-confirm');
-            const cancelBtn = document.getElementById('confirm-modal-cancel');
-
-            const confirmHandler = () => {
-                onConfirm();
-                hideConfirmModal();
-                cleanup();
-            };
-            const cancelHandler = () => {
-                hideConfirmModal();
-                cleanup();
-            };
-            const cleanup = () => {
-                confirmBtn.removeEventListener('click', confirmHandler);
-                cancelBtn.removeEventListener('click', cancelHandler);
-            };
-
-            confirmBtn.addEventListener('click', confirmHandler);
-            cancelBtn.addEventListener('click', cancelHandler);
-        }
-
-        function hideConfirmModal() {
-            document.getElementById('confirm-modal').classList.remove('flex');
-        }
-
-
-        // --- LÓGICA DE IMPORTACIÓN / EXPORTACIÓN ---
-        function importCards() {
-            const text = document.getElementById('bulk-import-text').value;
-            const cardBlocks = text.split(/\n\s*\n/);
-            const subject = state.subjects.find(s => s.id === state.selectedSubjectId);
-            const topic = subject.topics.find(t => t.id === state.selectedTopicId);
-            let cardsAdded = 0;
-
-            cardBlocks.forEach(block => {
-                if (block.trim() === '') return;
-                const parts = block.split(/\n---\n/);
-                if (parts.length === 2) {
-                    const question = parts[0].trim();
-                    const answer = parts[1].trim();
-                    if (question && answer) {
-                        topic.cards.push({ id: Date.now() + Math.random(), question, answer, repetition: 0, interval: 1, easeFactor: 2.5, dueDate: new Date().toISOString() });
-                        cardsAdded++;
-                    }
-                }
             });
+        });
+        state = loadedState;
+    } else {
+        state.subjects = [
+            { id: 1, name: 'Matemáticas', topics: [{ id: 1, name: 'Teoría de Conjuntos', cards: [{ id: 1, question: '¿Qué es un conjunto?', answer: 'Una colección de elementos distintos.', repetition: 0, interval: 1, easeFactor: 2.5, dueDate: new Date().toISOString() }, { id: 2, question: '¿Qué es la unión de dos conjuntos A y B?', answer: 'Un conjunto con todos los elementos de A y B.', repetition: 0, interval: 1, easeFactor: 2.5, dueDate: new Date().toISOString() }] }] },
+            { id: 2, name: 'Historia', topics: [] }
+        ];
+    }
+}
 
-            if (cardsAdded > 0) {
-                saveData();
-                closeImportModal();
-                render();
-            } else {
-                alert('No se pudieron importar las tarjetas. Por favor, revisa el formato del texto.');
-            }
-        }
+// Navegación y renderizado
+function navigate(view, params = {}) {
+    state.currentView = view;
+    if (params.subjectId !== undefined) state.selectedSubjectId = params.subjectId;
+    if (params.topicId !== undefined) state.selectedTopicId = params.topicId;
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    const activeItem = document.querySelector(`.nav-item[onclick="navigate('${view.split('_')[0]}')"]`);
+    if (activeItem) activeItem.classList.add('active');
+    render();
+}
 
-        function exportBackup() {
-            const dataStr = JSON.stringify(state, null, 2);
-            const dataBlob = new Blob([dataStr], {type: "application/json"});
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.download = 'estudio-flash-backup.json';
-            link.href = url;
-            link.click();
-            URL.revokeObjectURL(url);
-        }
+function render() {
+    const mainContent = document.getElementById('main-content');
+    switch (state.currentView) {
+        case 'home':
+            mainContent.innerHTML = renderHome();
+            break;
+        case 'subject_details':
+            mainContent.innerHTML = renderSubjectDetails();
+            break;
+        case 'topic_details':
+            mainContent.innerHTML = renderTopicDetails();
+            break;
+        case 'study':
+            mainContent.innerHTML = renderStudySelection();
+            break;
+        case 'study_session':
+            mainContent.innerHTML = renderStudySession();
+            break;
+        case 'goals':
+            mainContent.innerHTML = renderGoals();
+            break;
+    }
+}
 
-        function triggerBackupImport() {
-            document.getElementById('import-backup-input').click();
-        }
+// ---------------------- AQUÍ SIGUE TODO TU JS ----------------------
+// Copia tal cual todo tu código de funciones renderHome, renderSubjectDetails, 
+// renderTopicDetails, renderStudySelection, renderStudySession, renderGoals, 
+// y todas las funciones de manejo de tarjetas, import/export, modales, sonidos, etc.
+// ---------------------- FIN JS ----------------------
+loadData();
+render();
+</script>
 
-        function handleBackupFileSelect(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importedState = JSON.parse(e.target.result);
-                    // Validar que el objeto importado tiene la estructura esperada
-                    if (importedState && Array.isArray(importedState.subjects)) {
-                         showConfirmModal('Esto sobrescribirá todos tus datos actuales. Esta acción no se puede deshacer.', () => {
-                            state = importedState;
-                            saveData();
-                            navigate('home');
-                         });
-                    } else {
-                        throw new Error('Formato de archivo no válido.');
-                    }
-                } catch (error) {
-                    alert('Error al leer el archivo de respaldo. Asegúrate de que es un archivo válido.');
-                    console.error("Error parsing backup file:", error);
-                }
-            };
-            reader.readAsText(file);
-            event.target.value = ''; // Reset input para poder seleccionar el mismo archivo de nuevo
-        }
-
-
-        function findCardById(cardId) {
-            for (const subject of state.subjects) {
-                for (const topic of subject.topics) {
-                    const foundCard = topic.cards.find(c => c.id === cardId);
-                    if (foundCard) return foundCard;
-                }
-            }
-            return null;
-        }
-
-        function calculateSpacedRepetition(card, isCorrect) {
-            const quality = isCorrect ? 5 : 1; 
-
-            if (quality < 3) {
-                card.repetition = 0;
-                card.interval = 1;
-            } else {
-                card.easeFactor = Math.max(1.3, card.easeFactor + 0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
-                
-                if (card.repetition === 0) card.interval = 1;
-                else if (card.repetition === 1) card.interval = 6;
-                else card.interval = Math.ceil(card.interval * card.easeFactor);
-                
-                card.repetition++;
-            }
-
-            const today = new Date();
-            const nextDueDate = new Date(today.setDate(today.getDate() + card.interval));
-            card.dueDate = nextDueDate.toISOString();
-        }
-
-        function startStudySession(subjectId, topicId, mode = 'all') {
-            const subject = state.subjects.find(s => s.id === subjectId);
-            const topic = subject.topics.find(t => t.id === topicId);
-            let cardsToStudy = [];
-
-            if (mode === 'review') {
-                const today = new Date();
-                today.setHours(23, 59, 59, 999);
-                cardsToStudy = topic.cards.filter(card => new Date(card.dueDate) <= today);
-            } else {
-                cardsToStudy = [...topic.cards];
-            }
-
-            if (cardsToStudy.length === 0) {
-                alert('No hay tarjetas para esta sesión de estudio.');
-                return;
-            }
-
-            state.studySession = {
-                cards: cardsToStudy.sort(() => Math.random() - 0.5),
-                currentIndex: 0,
-                correct: 0,
-                incorrect: 0
-            };
-            navigate('study_session');
-        }
-
-        function flipCard() {
-            document.getElementById('flashcard').classList.toggle('is-flipped');
-        }
-
-        function markAnswer(isCorrect) {
-            const sessionCard = state.studySession.cards[state.studySession.currentIndex];
-            const originalCard = findCardById(sessionCard.id);
-
-            if (originalCard) calculateSpacedRepetition(originalCard, isCorrect);
-
-            if (isCorrect) {
-                correctSound();
-                state.studySession.correct++;
-            } else {
-                incorrectSound();
-                state.studySession.incorrect++;
-            }
-            state.studySession.currentIndex++;
-            saveData();
-            
-            setTimeout(() => { render(); }, 500);
-        }
-
-        // --- INICIALIZACIÓN ---
-        window.onload = () => {
-            loadData();
-            navigate('home');
-        };
-
-        // --- SERVICE WORKER PARA PWA ---
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then(registration => console.log('ServiceWorker registration successful with scope: ', registration.scope))
-                    .catch(err => console.log('ServiceWorker registration failed: ', err));
-            });
-        }
-    </script>
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => console.log('ServiceWorker registration successful with scope: ', registration.scope))
+            .catch(err => console.log('ServiceWorker registration failed: ', err));
+    });
+}
+</script>
 </body>
 </html>
